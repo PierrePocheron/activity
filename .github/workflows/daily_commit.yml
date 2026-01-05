@@ -1,0 +1,27 @@
+name: Autocommit
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # S'exécute tous les jours à minuit UTC
+  workflow_dispatch: # Permet de le lancer manuellement pour tester
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Important pour que le bot puisse écrire
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update log
+        run: |
+          echo "Dernière contribution : $(date)" > last_activity.txt
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add last_activity.txt
+          git commit -m "chore: daily update [skip ci]" || echo "Rien à committer"
+          git push
